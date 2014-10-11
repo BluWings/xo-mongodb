@@ -68,35 +68,35 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
 
     public boolean hasSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
+        DBObject query;
         switch (direction) {
         case FROM:
-            return relationships.find(new BasicDBObject("_in_document", source),
-                    new BasicDBObject(XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()))
-                    .count() > 0;
+            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+            break;
         case TO:
-            return relationships.find(new BasicDBObject("_out_document", source),
-                    new BasicDBObject(XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()))
-                    .count() > 0;
+            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+            break;
         default:
             throw new XOException("Unkown direction '" + direction.name() + "'.");
         }
+        return relationships.find(query).count() > 0;
     }
 
     public DBObject getSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
         DBCursor matches;
+        DBObject query;
         switch (direction) {
         case FROM:
-            matches = relationships.find(new BasicDBObject("_in_document", source), new BasicDBObject(
-                    XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()));
+            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
             break;
         case TO:
-            matches = relationships.find(new BasicDBObject("_out_document", source), new BasicDBObject(
-                    XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()));
+            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
             break;
         default:
             throw new XOException("Unkown direction '" + direction.name() + "'.");
         }
+        matches = relationships.find(query);
         if (!matches.hasNext()) {
             return null;
         }
@@ -109,18 +109,18 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
     public Iterable<DBObject> getRelations(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
         DBCursor matches;
+        DBObject query;
         switch (direction) {
         case FROM:
-            matches = relationships.find(new BasicDBObject("_in_document", source), new BasicDBObject(
-                    XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()));
+            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
             break;
         case TO:
-            matches = relationships.find(new BasicDBObject("_out_document", source), new BasicDBObject(
-                    XO_DISCRIMINATORS_PROPERTY, metadata.getDatastoreMetadata().getDiscriminator()));
+            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
             break;
         default:
             throw new XOException("Unkown direction '" + direction.name() + "'.");
         }
+        matches = relationships.find(query);
         return matches.toArray();
     }
 
@@ -132,6 +132,14 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
     public DBObject getTo(DBObject relation) {
         DBObject object = documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_out_document")).get());
         return object;
+    }
+
+    private DBObject getQuery(String inOut, DBObject source, String discriminator) {
+        return QueryBuilder
+                .start()
+                .and(QueryBuilder.start(inOut).is(source.get(MONGODB_ID)).get(),
+                        QueryBuilder.start(XO_DISCRIMINATORS_PROPERTY).is(discriminator).get()).get();
+
     }
 
 }
