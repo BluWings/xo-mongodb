@@ -37,7 +37,7 @@ public class CrudTest extends AbstractMongoDbXOManagerTest {
         a.setName("Foo");
         xoManager.currentTransaction().commit();
         xoManager.currentTransaction().begin();
-        a = xoManager.createQuery( "{ name : 'Foo' }", A.class).execute().getSingleResult();
+        a = xoManager.createQuery("{ name : 'Foo' }", A.class).execute().getSingleResult();
         assertThat(a.getName(), equalTo("Foo"));
         a.setName("Bar");
         xoManager.currentTransaction().commit();

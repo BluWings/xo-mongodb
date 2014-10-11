@@ -5,10 +5,10 @@ import com.smbtec.xo.mongodb.api.annotation.Relation;
 @Relation
 public interface A2B {
 
-	@Relation.Outgoing
-	A getA();
+    @Relation.Outgoing
+    A getA();
 
-	@Relation.Incoming
-	B getB();
+    @Relation.Incoming
+    B getB();
 
 }

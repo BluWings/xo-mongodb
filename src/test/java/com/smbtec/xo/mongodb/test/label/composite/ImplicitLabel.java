@@ -10,4 +10,3 @@ public interface ImplicitLabel {
     void setString(String string);
 
 }
-

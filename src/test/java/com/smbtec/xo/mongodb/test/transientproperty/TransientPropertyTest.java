@@ -19,34 +19,34 @@ import com.smbtec.xo.mongodb.test.transientproperty.composite.A;
 @RunWith(Parameterized.class)
 public class TransientPropertyTest extends AbstractMongoDbXOManagerTest {
 
-	public TransientPropertyTest(XOUnit xoUnit) {
-		super(xoUnit);
-	}
+    public TransientPropertyTest(XOUnit xoUnit) {
+        super(xoUnit);
+    }
 
-	@Parameterized.Parameters
-	public static Collection<Object[]> getXOUnits() throws URISyntaxException {
-		return xoUnits(A.class);
-	}
+    @Parameterized.Parameters
+    public static Collection<Object[]> getXOUnits() throws URISyntaxException {
+        return xoUnits(A.class);
+    }
 
-	@Test
-	public void transientProperty() {
-		XOManager xoManager = getXoManager();
-		xoManager.currentTransaction().begin();
-		A a = xoManager.create(A.class);
-		a.setValue("persistent value");
-		a.setTransientValue("transient value");
-		xoManager.currentTransaction().commit();
-		xoManager.currentTransaction().begin();
-		assertThat(a.getValue(), equalTo("persistent value"));
-		assertThat(a.getTransientValue(), equalTo("transient value"));
-		xoManager.currentTransaction().commit();
-		closeXOmanager();
-		xoManager = getXoManager();
-		xoManager.currentTransaction().begin();
-		A result = xoManager.createQuery("{\"value\":\"persistent value\"}", A.class).execute().getSingleResult();
-		assertThat(result.getValue(), equalTo("persistent value"));
-		assertThat(result.getTransientValue(), nullValue());
-		xoManager.currentTransaction().commit();
-	}
+    @Test
+    public void transientProperty() {
+        XOManager xoManager = getXoManager();
+        xoManager.currentTransaction().begin();
+        A a = xoManager.create(A.class);
+        a.setValue("persistent value");
+        a.setTransientValue("transient value");
+        xoManager.currentTransaction().commit();
+        xoManager.currentTransaction().begin();
+        assertThat(a.getValue(), equalTo("persistent value"));
+        assertThat(a.getTransientValue(), equalTo("transient value"));
+        xoManager.currentTransaction().commit();
+        closeXOmanager();
+        xoManager = getXoManager();
+        xoManager.currentTransaction().begin();
+        A result = xoManager.createQuery("{ value: 'persistent value' }", A.class).execute().getSingleResult();
+        assertThat(result.getValue(), equalTo("persistent value"));
+        assertThat(result.getTransientValue(), nullValue());
+        xoManager.currentTransaction().commit();
+    }
 
 }

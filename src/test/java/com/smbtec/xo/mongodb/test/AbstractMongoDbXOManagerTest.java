@@ -1,6 +1,5 @@
 package com.smbtec.xo.mongodb.test;
 
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -25,68 +24,62 @@ import static com.smbtec.xo.mongodb.test.AbstractMongoDbXOManagerTest.MongoDatab
 
 public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest {
 
-	protected enum MongoDatabase implements AbstractXOManagerTest.Database {
+    protected enum MongoDatabase implements AbstractXOManagerTest.Database {
 
-		MEMORY("mongodb:///");
+        MEMORY("mongodb:///");
 
-		private URI uri;
+        private URI uri;
 
-		private MongoDatabase(String uri) {
-			try {
-				this.uri = new URI(uri);
-			} catch (URISyntaxException e) {
-				throw new IllegalArgumentException(e);
-			}
-		}
+        private MongoDatabase(String uri) {
+            try {
+                this.uri = new URI(uri);
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
 
-		public URI getUri() {
-			return uri;
-		}
+        public URI getUri() {
+            return uri;
+        }
 
-		public Class<?> getProvider() {
-			return MongoDbXOProvider.class;
-		}
+        public Class<?> getProvider() {
+            return MongoDbXOProvider.class;
+        }
 
-	}
+    }
 
-	protected AbstractMongoDbXOManagerTest(XOUnit xoUnit) {
-		super(xoUnit);
-	}
+    protected AbstractMongoDbXOManagerTest(XOUnit xoUnit) {
+        super(xoUnit);
+    }
 
-	@BeforeClass
-	public static void startServer() {
-		// GraphDatabaseService graphDatabaseService = new
-		// TestGraphDatabaseFactory().newImpermanentDatabase();
-		// server = new WrappingNeoServer((GraphDatabaseAPI)
-		// graphDatabaseService);
-		// server.start();
-	}
+    @BeforeClass
+    public static void startServer() {
+    }
 
-	protected static Collection<Object[]> xoUnits(Class<?>... types) {
-		return xoUnits(Arrays.asList(MEMORY), Arrays.asList(types), Collections.<Class<?>> emptyList(),
-				ValidationMode.AUTO, ConcurrencyMode.SINGLETHREADED, Transaction.TransactionAttribute.NONE);
-	}
+    protected static Collection<Object[]> xoUnits(Class<?>... types) {
+        return xoUnits(Arrays.asList(MEMORY), Arrays.asList(types), Collections.<Class<?>> emptyList(),
+                ValidationMode.AUTO, ConcurrencyMode.SINGLETHREADED, Transaction.TransactionAttribute.NONE);
+    }
 
-	protected static Collection<Object[]> xoUnits(List<? extends Class<?>> types,
-			List<? extends Class<?>> instanceListeners, ValidationMode validationMode, ConcurrencyMode concurrencyMode,
-			Transaction.TransactionAttribute transactionAttribute) {
-		return xoUnits(Arrays.asList(MEMORY), types, instanceListeners, validationMode, concurrencyMode,
-				transactionAttribute);
-	}
+    protected static Collection<Object[]> xoUnits(List<? extends Class<?>> types,
+            List<? extends Class<?>> instanceListeners, ValidationMode validationMode, ConcurrencyMode concurrencyMode,
+            Transaction.TransactionAttribute transactionAttribute) {
+        return xoUnits(Arrays.asList(MEMORY), types, instanceListeners, validationMode, concurrencyMode,
+                transactionAttribute);
+    }
 
-	@AfterClass
-	public static void stopServer() {
-		// server.stop();
-	}
+    @AfterClass
+    public static void stopServer() {
+    }
 
-	protected void dropDatabase() {
-		XOManager manager = getXoManager();
-		manager.currentTransaction().begin();
-		MongoDbDatastoreSession session = manager.getDatastoreSession(MongoDbDatastoreSession.class);
-		session.getDocuments().remove(new BasicDBObject());
-		session.getDocuments().dropIndexes();
-		session.getReferences().remove(new BasicDBObject());
-		session.getReferences().dropIndexes();
-		manager.currentTransaction().commit();
-	}
+    protected void dropDatabase() {
+        XOManager manager = getXoManager();
+        manager.currentTransaction().begin();
+        MongoDbDatastoreSession session = manager.getDatastoreSession(MongoDbDatastoreSession.class);
+        session.getDocuments().remove(new BasicDBObject());
+        session.getDocuments().dropIndexes();
+        session.getReferences().remove(new BasicDBObject());
+        session.getReferences().dropIndexes();
+        manager.currentTransaction().commit();
+    }
 }

@@ -7,14 +7,14 @@ package com.smbtec.xo.mongodb.impl.metadata;
  */
 public class PropertyMetadata {
 
-	private final String name;
+    private final String name;
 
-	public PropertyMetadata(final String name) {
-		this.name = name;
-	}
+    public PropertyMetadata(final String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
 }

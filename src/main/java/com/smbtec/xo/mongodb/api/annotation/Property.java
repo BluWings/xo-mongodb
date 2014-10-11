@@ -19,8 +19,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Property {
 
-	/**
-	 * @return The name of the node property.
-	 */
-	String value();
+    /**
+     * @return The name of the node property.
+     */
+    String value();
 }

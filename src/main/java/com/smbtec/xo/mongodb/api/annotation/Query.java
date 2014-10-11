@@ -17,13 +17,13 @@ import com.buschmais.xo.spi.annotation.QueryDefinition;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Query {
 
-	/**
-	 * The JSON string that defines the query to be executed.
-	 */
-	String value() default "";
+    /**
+     * The JSON string that defines the query to be executed.
+     */
+    String value() default "";
 
-	/**
-	 * The fields that should be returned.
-	 */
-	String fields() default "";
+    /**
+     * The fields that should be returned.
+     */
+    String fields() default "";
 }

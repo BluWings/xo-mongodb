@@ -5,7 +5,7 @@ import com.smbtec.xo.mongodb.api.annotation.Document;
 @Document
 public interface A {
 
-	String getName();
+    String getName();
 
-	void setName(String name);
+    void setName(String name);
 }
