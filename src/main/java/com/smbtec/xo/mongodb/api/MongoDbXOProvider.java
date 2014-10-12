@@ -7,8 +7,8 @@ import com.buschmais.xo.api.XOException;
 import com.buschmais.xo.api.bootstrap.XOUnit;
 import com.buschmais.xo.spi.bootstrap.XODatastoreProvider;
 import com.buschmais.xo.spi.datastore.Datastore;
-import com.mongodb.Mongo;
-import com.mongodb.MongoURI;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.smbtec.xo.mongodb.impl.MongoDbDatastore;
 import com.smbtec.xo.mongodb.impl.metadata.DocumentMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
@@ -31,8 +31,8 @@ public class MongoDbXOProvider implements XODatastoreProvider<DocumentMetadata, 
         }
 
         try {
-            Mongo mongo = new Mongo(new MongoURI(uri.toString()));
-            return new MongoDbDatastore(mongo.getDB("xo"));
+            MongoClient client = new MongoClient(new MongoClientURI(uri.toString()));
+            return new MongoDbDatastore(client.getDB("xo"));
         } catch (UnknownHostException e) {
             throw new XOException("", e);
         }
