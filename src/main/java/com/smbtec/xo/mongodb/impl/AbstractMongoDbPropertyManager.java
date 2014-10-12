@@ -21,6 +21,10 @@ public abstract class AbstractMongoDbPropertyManager<E extends DBObject> impleme
      */
     public static final String XO_DISCRIMINATORS_PROPERTY = "_xo_discriminator_";
 
+    public static final String XO_IN_DOCUMENT = "_xo_in_document";
+
+    public static final String XO_OUT_DOCUMENT = "_xo_out_document";
+
     public static final String MONGODB_ID = "_id";
 
     abstract DBCollection getDBCollection();

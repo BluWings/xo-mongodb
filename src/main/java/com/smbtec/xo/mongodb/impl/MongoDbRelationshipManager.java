@@ -49,8 +49,8 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
             Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
         final String name = metadata.getDatastoreMetadata().getDiscriminator();
         BasicDBObject relation = new BasicDBObject();
-        relationships.insert(relation.append("_in_document", source.get(MONGODB_ID))
-                .append("_out_document", target.get(MONGODB_ID)).append(XO_DISCRIMINATORS_PROPERTY, name));
+        relationships.insert(relation.append(XO_IN_DOCUMENT, source.get(MONGODB_ID))
+                .append(XO_OUT_DOCUMENT, target.get(MONGODB_ID)).append(XO_DISCRIMINATORS_PROPERTY, name));
         return relation;
     }
 
@@ -93,20 +93,20 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
     }
 
     public DBObject getFrom(DBObject relation) {
-        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_in_document")).get());
+        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get(XO_IN_DOCUMENT)).get());
     }
 
     public DBObject getTo(DBObject relation) {
-        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_out_document")).get());
+        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get(XO_OUT_DOCUMENT)).get());
     }
 
     private DBObject getQueryObject(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
         switch (direction) {
         case FROM:
-            return getQueryObject("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+            return getQueryObject(XO_IN_DOCUMENT, source, metadata.getDatastoreMetadata().getDiscriminator());
         case TO:
-            return getQueryObject("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+            return getQueryObject(XO_OUT_DOCUMENT, source, metadata.getDatastoreMetadata().getDiscriminator());
         default:
             throw new XOException("Unkown direction '" + direction.name() + "'.");
         }
