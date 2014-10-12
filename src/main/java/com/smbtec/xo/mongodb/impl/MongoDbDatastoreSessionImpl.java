@@ -7,6 +7,7 @@ import com.buschmais.xo.spi.datastore.DatastoreEntityManager;
 import com.buschmais.xo.spi.datastore.DatastoreQuery;
 import com.buschmais.xo.spi.datastore.DatastoreRelationManager;
 import com.buschmais.xo.spi.datastore.DatastoreTransaction;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -15,6 +16,9 @@ import com.smbtec.xo.mongodb.api.annotation.Query;
 import com.smbtec.xo.mongodb.impl.metadata.DocumentMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.PropertyMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
+
+import static com.smbtec.xo.mongodb.impl.AbstractMongoDbPropertyManager.XO_IN_DOCUMENT;
+import static com.smbtec.xo.mongodb.impl.AbstractMongoDbPropertyManager.XO_OUT_DOCUMENT;
 
 /**
  *
@@ -34,6 +38,9 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
         this.database = database;
         documentCollection = database.getCollection("documents");
         referenceCollection = database.getCollection("relationships");
+
+        referenceCollection.ensureIndex(new BasicDBObject().append(XO_IN_DOCUMENT, 1));
+        referenceCollection.ensureIndex(new BasicDBObject().append(XO_OUT_DOCUMENT, 1));
 
         documentManager = new MongoDbDocumentManager(documentCollection);
         relationManager = new MongoDbRelationshipManager(documentCollection, referenceCollection);
