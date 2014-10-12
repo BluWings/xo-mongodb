@@ -68,35 +68,14 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
 
     public boolean hasSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
-        DBObject query;
-        switch (direction) {
-        case FROM:
-            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        case TO:
-            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        default:
-            throw new XOException("Unkown direction '" + direction.name() + "'.");
-        }
+        DBObject query = getQueryObject(source, metadata, direction);
         return relationships.find(query).count() > 0;
     }
 
     public DBObject getSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
-        DBCursor matches;
-        DBObject query;
-        switch (direction) {
-        case FROM:
-            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        case TO:
-            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        default:
-            throw new XOException("Unkown direction '" + direction.name() + "'.");
-        }
-        matches = relationships.find(query);
+        DBObject query = getQueryObject(source, metadata, direction);
+        DBCursor matches = relationships.find(query);
         if (!matches.hasNext()) {
             return null;
         }
@@ -108,33 +87,33 @@ public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<D
 
     public Iterable<DBObject> getRelations(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
-        DBCursor matches;
-        DBObject query;
-        switch (direction) {
-        case FROM:
-            query = getQuery("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        case TO:
-            query = getQuery("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
-            break;
-        default:
-            throw new XOException("Unkown direction '" + direction.name() + "'.");
-        }
-        matches = relationships.find(query);
+        DBObject query = getQueryObject(source, metadata, direction);
+        DBCursor matches = relationships.find(query);
         return matches.toArray();
     }
 
     public DBObject getFrom(DBObject relation) {
-        DBObject object = documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_in_document")).get());
-        return object;
+        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_in_document")).get());
     }
 
     public DBObject getTo(DBObject relation) {
-        DBObject object = documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_out_document")).get());
-        return object;
+        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get("_out_document")).get());
     }
 
-    private DBObject getQuery(String inOut, DBObject source, String discriminator) {
+    private DBObject getQueryObject(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
+            Direction direction) {
+        switch (direction) {
+        case FROM:
+            return getQueryObject("_in_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+        case TO:
+            return getQueryObject("_out_document", source, metadata.getDatastoreMetadata().getDiscriminator());
+        default:
+            throw new XOException("Unkown direction '" + direction.name() + "'.");
+        }
+
+    }
+
+    private DBObject getQueryObject(String inOut, DBObject source, String discriminator) {
         return QueryBuilder
                 .start()
                 .and(QueryBuilder.start(inOut).is(source.get(MONGODB_ID)).get(),
