@@ -1,6 +1,7 @@
 package com.smbtec.xo.mongodb.impl;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.buschmais.xo.spi.datastore.DatastorePropertyManager;
 import com.buschmais.xo.spi.metadata.method.PrimitivePropertyMethodMetadata;
@@ -47,5 +48,11 @@ public abstract class AbstractMongoDbPropertyManager<E extends DBObject> impleme
 
     public void setProperties(E element, Map<String, Object> properties) {
         element.putAll(properties);
+    }
+
+    public void removeProperties(E element, Set<String> properties) {
+        for (String property : properties) {
+            element.removeField(property);
+        }
     }
 }

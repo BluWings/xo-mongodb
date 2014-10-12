@@ -109,6 +109,8 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<DBObj
     public void migrateEntity(DBObject entity, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types,
             Set<String> discriminators, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> targetTypes,
             Set<String> targetDiscriminators) {
+        removeProperties(entity, getDiscriminatorProperties(discriminators).keySet());
+        setProperties(entity, getDiscriminatorProperties(targetDiscriminators));
     }
 
     public void flushEntity(DBObject entity) {
