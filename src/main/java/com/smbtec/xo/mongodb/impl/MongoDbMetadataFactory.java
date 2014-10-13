@@ -11,7 +11,6 @@ import com.buschmais.xo.spi.reflection.PropertyMethod;
 import com.google.common.base.CaseFormat;
 import com.smbtec.xo.mongodb.api.annotation.Document;
 import com.smbtec.xo.mongodb.api.annotation.Property;
-import com.smbtec.xo.mongodb.api.annotation.Reference;
 import com.smbtec.xo.mongodb.api.annotation.Relation;
 import com.smbtec.xo.mongodb.impl.metadata.DocumentMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.PropertyMetadata;
