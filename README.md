@@ -13,7 +13,7 @@ Build
 
 Start the Maven build on command line
 
-  mvn clean package
+    mvn clean package
 
 Continuous Build
 ----------------
