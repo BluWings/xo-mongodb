@@ -8,7 +8,7 @@
 
     <properties>
         <com.buschmais.xo_version>0.5.0-SNAPSHOT</com.buschmais.xo_version>
-        <org.mongodb.mongodb-java-driver_version>2.11.3</org.mongodb.mongodb-java-driver_version>
+        <org.mongodb.mongodb-java-driver_version>2.12.3</org.mongodb.mongodb-java-driver_version>
         <bundle.name>com.smb-tec.xo.${project.artifactId}</bundle.name>
     </properties>
 
@@ -184,8 +184,6 @@
             <artifactId>xo.spi</artifactId>
             <version>${com.buschmais.xo_version}</version>
         </dependency>
-        <!-- <dependency> <groupId>com.buschmais.xo</groupId> <artifactId>xo.impl</artifactId>
-            <version>${com.buschmais.xo_version}</version> </dependency> -->
         <!-- MongoDb -->
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -197,7 +195,7 @@
             <groupId>com.github.fakemongo</groupId>
             <artifactId>fongo</artifactId>
             <version>1.5.6</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.buschmais.xo</groupId>

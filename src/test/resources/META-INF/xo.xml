@@ -1,7 +1,7 @@
 <v1:xo version="1.0" xmlns:v1="http://buschmais.com/xo/schema/v1.0">
     <xo-unit name="MongoDb">
         <description>This is a test unit for MongoDb.</description>
-        <url>mongodb://localhost</url>
+        <url>fongodb:///</url>
         <provider>com.smbtec.xo.mongodb.api.MongoDbXOProvider</provider>
         <types>
             <type>com.smbtec.xo.mongodb.test.bootstrap.composite.A</type>

@@ -7,16 +7,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import com.buschmais.xo.api.ConcurrencyMode;
 import com.buschmais.xo.api.Transaction;
 import com.buschmais.xo.api.ValidationMode;
 import com.buschmais.xo.api.XOManager;
 import com.buschmais.xo.api.bootstrap.XOUnit;
 import com.buschmais.xo.test.AbstractXOManagerTest;
+
 import com.mongodb.BasicDBObject;
+
 import com.smbtec.xo.mongodb.api.MongoDbDatastoreSession;
 import com.smbtec.xo.mongodb.api.MongoDbXOProvider;
 
@@ -26,7 +25,8 @@ public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest
 
     protected enum MongoDatabase implements AbstractXOManagerTest.Database {
 
-        MEMORY("mongodb:///");
+        REMOTE("mongodb://127.0.0.1:27017"),
+        MEMORY("fongodb:///");
 
         private URI uri;
 
@@ -52,10 +52,6 @@ public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest
         super(xoUnit);
     }
 
-    @BeforeClass
-    public static void startServer() {
-    }
-
     protected static Collection<Object[]> xoUnits(Class<?>... types) {
         return xoUnits(Arrays.asList(MEMORY), Arrays.asList(types), Collections.<Class<?>> emptyList(),
                 ValidationMode.AUTO, ConcurrencyMode.SINGLETHREADED, Transaction.TransactionAttribute.NONE);
@@ -66,10 +62,6 @@ public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest
             Transaction.TransactionAttribute transactionAttribute) {
         return xoUnits(Arrays.asList(MEMORY), types, instanceListeners, validationMode, concurrencyMode,
                 transactionAttribute);
-    }
-
-    @AfterClass
-    public static void stopServer() {
     }
 
     protected void dropDatabase() {
