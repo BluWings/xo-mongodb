@@ -37,11 +37,10 @@ public class ValidationTest extends AbstractMongoDbXOManagerTest {
     @Test
     public void validationOnCommitAfterInsert() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
         Set<ConstraintViolation<?>> constraintViolations = null;
         try {
-            xoManager.currentTransaction().commit();
+            xoManager.flush();
             Assert.fail("Validation must fail.");
         } catch (ConstraintViolationException e) {
             constraintViolations = e.getConstraintViolations();
@@ -50,53 +49,47 @@ public class ValidationTest extends AbstractMongoDbXOManagerTest {
         B b = xoManager.create(B.class);
         a.setB(b);
         a.setName("Indiana Jones");
-        xoManager.currentTransaction().commit();
     }
 
     @Test
     public void validationOnCommitAfterQuery() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         B b = xoManager.create(B.class);
         for (int i = 0; i < 2; i++) {
             A a = xoManager.create(A.class);
             a.setName("Miller");
             a.setB(b);
         }
-        xoManager.currentTransaction().commit();
+        xoManager.flush();
         closeXOmanager();
         xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         for (A miller : xoManager.createQuery("{ name: 'Miller' }", A.class).execute()) {
             miller.setName(null);
         }
         Set<ConstraintViolation<?>> constraintViolations = null;
         try {
-            xoManager.currentTransaction().commit();
+            xoManager.flush();
             Assert.fail("Validation must fail.");
         } catch (ConstraintViolationException e) {
             constraintViolations = e.getConstraintViolations();
         }
         assertThat(constraintViolations.size(), equalTo(1));
-        xoManager.currentTransaction().rollback();
     }
 
     @Test
     public void validationAfterPreUpdate() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         B b = xoManager.create(B.class);
         A a = xoManager.create(A.class);
         a.setB(b);
         Set<ConstraintViolation<?>> constraintViolations = null;
         try {
-            xoManager.currentTransaction().commit();
+            xoManager.flush();
         } catch (ConstraintViolationException e) {
             constraintViolations = e.getConstraintViolations();
         }
         assertThat(constraintViolations.size(), equalTo(1));
         xoManager.registerInstanceListener(new InstanceListener());
-        xoManager.currentTransaction().commit();
     }
 
     public static final class InstanceListener {

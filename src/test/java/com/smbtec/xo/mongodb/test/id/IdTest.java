@@ -5,7 +5,6 @@ import com.buschmais.xo.api.XOManager;
 import com.buschmais.xo.api.bootstrap.XOUnit;
 import com.smbtec.xo.mongodb.test.AbstractMongoDbXOManagerTest;
 import com.smbtec.xo.mongodb.test.id.composite.A;
-import com.smbtec.xo.mongodb.test.id.composite.A2B;
 import com.smbtec.xo.mongodb.test.id.composite.B;
 
 import org.junit.Test;
@@ -28,24 +27,19 @@ public class IdTest extends AbstractMongoDbXOManagerTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> getXOUnits() throws URISyntaxException {
-        return xoUnits(A.class, B.class, A2B.class);
+        return xoUnits(A.class, B.class);
     }
 
     @Test
     public void id() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
         B b = xoManager.create(B.class);
-        A2B a2b = xoManager.create(a, A2B.class, b);
         Object aId = xoManager.getId(a);
         assertThat(aId, notNullValue());
         assertThat(((CompositeObject) a).getId(), equalTo(aId));
         Object bId = xoManager.getId(b);
         assertThat(bId, notNullValue());
         assertThat(((CompositeObject) b).getId(), equalTo(bId));
-        Object a2bId = xoManager.getId(a2b);
-        assertThat(a2bId, notNullValue());
-        assertThat(((CompositeObject) a2b).getId(), equalTo(a2bId));
     }
 }

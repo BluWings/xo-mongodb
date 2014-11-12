@@ -31,18 +31,14 @@ public class ValidationModeNoneTest extends AbstractMongoDbXOManagerTest {
     @Parameterized.Parameters
     public static Collection<Object[]> getXOUnits() throws URISyntaxException {
         return xoUnits(asList(A.class, B.class), Collections.<Class<?>> emptyList(), ValidationMode.NONE,
-                ConcurrencyMode.SINGLETHREADED, Transaction.TransactionAttribute.MANDATORY);
+                ConcurrencyMode.SINGLETHREADED, Transaction.TransactionAttribute.NONE);
     }
 
     @Test
     public void validationOnCommitAfterInsert() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
-        xoManager.currentTransaction().commit();
-        xoManager.currentTransaction().begin();
         assertThat(a.getName(), nullValue());
-        xoManager.currentTransaction().commit();
     }
 
 }

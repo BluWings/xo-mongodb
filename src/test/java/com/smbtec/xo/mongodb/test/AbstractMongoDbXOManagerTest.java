@@ -7,26 +7,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.After;
+
 import com.buschmais.xo.api.ConcurrencyMode;
 import com.buschmais.xo.api.Transaction;
 import com.buschmais.xo.api.ValidationMode;
 import com.buschmais.xo.api.XOManager;
 import com.buschmais.xo.api.bootstrap.XOUnit;
 import com.buschmais.xo.test.AbstractXOManagerTest;
-
-import com.mongodb.BasicDBObject;
-
+import com.mongodb.CommandFailureException;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.smbtec.xo.mongodb.api.MongoDbDatastoreSession;
 import com.smbtec.xo.mongodb.api.MongoDbXOProvider;
 
 import static com.smbtec.xo.mongodb.test.AbstractMongoDbXOManagerTest.MongoDatabase.MEMORY;
+import static com.smbtec.xo.mongodb.test.AbstractMongoDbXOManagerTest.MongoDatabase.REMOTE;
 
 public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest {
 
     protected enum MongoDatabase implements AbstractXOManagerTest.Database {
 
-        REMOTE("mongodb://127.0.0.1:27017"),
-        MEMORY("fongodb:///");
+        REMOTE("mongodb://127.0.0.1:27017"), MEMORY("fongodb:///");
 
         private URI uri;
 
@@ -64,14 +66,22 @@ public abstract class AbstractMongoDbXOManagerTest extends AbstractXOManagerTest
                 transactionAttribute);
     }
 
-    protected void dropDatabase() {
+    @After
+    public void cleanUp() {
         XOManager manager = getXoManager();
-        manager.currentTransaction().begin();
         MongoDbDatastoreSession session = manager.getDatastoreSession(MongoDbDatastoreSession.class);
-        session.getDocuments().remove(new BasicDBObject());
-        session.getDocuments().dropIndexes();
-        session.getReferences().remove(new BasicDBObject());
-        session.getReferences().dropIndexes();
-        manager.currentTransaction().commit();
+        DB database = session.getDatabase();
+        for (String collectionName : database.getCollectionNames()) {
+            try {
+                DBCollection collection = database.getCollection(collectionName);
+                collection.dropIndexes();
+                collection.drop();
+            } catch (CommandFailureException failure) {
+            }
+        }
+    }
+
+    @Override
+    protected void dropDatabase() {
     }
 }

@@ -16,36 +16,10 @@
  * limitations under the License.
  *
  */
-package com.smbtec.xo.mongodb.impl.metadata;
+package com.smbtec.xo.mongodb.api;
 
-import com.smbtec.xo.mongodb.impl.IndexDefinition;
+public class MongoDbConstants {
 
-/**
- *
- * @author Lars Martin - lars.martin@smb-tec.com
- *
- */
-public class PropertyMetadata {
-
-    private final String name;
-
-    private IndexDefinition index;
-
-    public PropertyMetadata(final String name) {
-        this.name = name;
-    }
-
-    public PropertyMetadata(final String name, IndexDefinition index) {
-        this.name = name;
-        this.index = index;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public IndexDefinition getIndexDefinition() {
-        return index;
-    }
+    public static final String MONGODB_ID = "_id";
 
 }

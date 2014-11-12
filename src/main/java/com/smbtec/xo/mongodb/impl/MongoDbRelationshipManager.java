@@ -1,17 +1,37 @@
+/*
+ * eXtended Objects - MongoDB Binding
+ *
+ * Copyright (C) 2014 SMB GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.smbtec.xo.mongodb.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import com.buschmais.xo.api.XOException;
 import com.buschmais.xo.spi.datastore.DatastoreRelationManager;
 import com.buschmais.xo.spi.metadata.method.PrimitivePropertyMethodMetadata;
 import com.buschmais.xo.spi.metadata.type.RelationTypeMetadata;
 import com.buschmais.xo.spi.metadata.type.RelationTypeMetadata.Direction;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
+import com.mongodb.DB;
+import com.mongodb.DBRef;
+import com.smbtec.xo.mongodb.api.MongoDbConstants;
 import com.smbtec.xo.mongodb.impl.metadata.PropertyMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
 
@@ -20,105 +40,118 @@ import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
-public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<DBObject> implements
-        DatastoreRelationManager<DBObject, Object, DBObject, RelationshipMetadata, String, PropertyMetadata> {
+public class MongoDbRelationshipManager extends AbstractMongoDbPropertyManager<MongoDbRelation> implements
+        DatastoreRelationManager<MongoDbDocument, Object, MongoDbRelation, RelationshipMetadata, String, PropertyMetadata> {
 
-    private DBCollection relationships;
-    private DBCollection documents;
+    private DB database;
 
-    public MongoDbRelationshipManager(DBCollection documents, DBCollection relationships) {
-        this.documents = documents;
-        this.relationships = relationships;
+    public MongoDbRelationshipManager(DB database) {
+        this.database = database;
     }
 
     @Override
-    DBCollection getDBCollection() {
-        return relationships;
-    }
-
     public boolean isRelation(Object o) {
-        return DBObject.class.isAssignableFrom(o.getClass());
+        return MongoDbRelation.class.isAssignableFrom(o.getClass());
     }
 
-    public String getRelationDiscriminator(DBObject relation) {
-        return (String) relation.get(XO_DISCRIMINATORS_PROPERTY);
+    @Override
+    public String getRelationDiscriminator(MongoDbRelation relation) {
+        return (String) relation.getLabel();
     }
 
-    public DBObject createRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
-            Direction direction, DBObject target,
-            Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
-        final String name = metadata.getDatastoreMetadata().getDiscriminator();
-        BasicDBObject relation = new BasicDBObject();
-        relationships.insert(relation.append(XO_IN_DOCUMENT, source.get(MONGODB_ID))
-                .append(XO_OUT_DOCUMENT, target.get(MONGODB_ID)).append(XO_DISCRIMINATORS_PROPERTY, name));
-        return relation;
-    }
+    @Override
+    public MongoDbRelation createRelation(MongoDbDocument source, RelationTypeMetadata<RelationshipMetadata> metadata, Direction direction,
+            MongoDbDocument target, Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
+        final String label = metadata.getDatastoreMetadata().getDiscriminator();
+        DBRef dbref = new DBRef(database, target.getLabel(), target.getDelegate().get(MongoDbConstants.MONGODB_ID));
 
-    public void deleteRelation(DBObject relation) {
-        relationships.remove(relation);
-    }
-
-    public Object getRelationId(DBObject relation) {
-        return relation.get(MONGODB_ID);
-    }
-
-    public void flushRelation(DBObject relation) {
-        getDBCollection().save(relation);
-    }
-
-    public boolean hasSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
-            Direction direction) {
-        DBObject query = getQueryObject(source, metadata, direction);
-        return relationships.find(query).count() > 0;
-    }
-
-    public DBObject getSingleRelation(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
-            Direction direction) {
-        DBObject query = getQueryObject(source, metadata, direction);
-        DBCursor matches = relationships.find(query);
-        if (!matches.hasNext()) {
-            return null;
+        if (metadata.getDatastoreMetadata().isCollectionType()) {
+            String collectionName = metadata.getDatastoreMetadata().getDiscriminator();
+            Object old = source.getDelegate().get(collectionName);
+            if (old != null) {
+                @SuppressWarnings("unchecked")
+                List<DBRef> oldDBRefList = (List<DBRef>) old;
+                List<DBRef> dbRefList = new ArrayList<>(oldDBRefList);
+                dbRefList.add(dbref);
+                source.getDelegate().put(collectionName, dbRefList);
+            } else {
+                source.getDelegate().put(collectionName, Arrays.asList(dbref));
+            }
+        } else {
+            source.getDelegate().put(label, dbref);
         }
-        if (matches.count() > 1) {
-            throw new XOException("More than one relationship found");
-        }
-        return matches.next();
+        return new MongoDbReference(label, source, target);
     }
 
-    public Iterable<DBObject> getRelations(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
+    @Override
+    public void deleteRelation(MongoDbRelation relation) {
+    }
+
+    @Override
+    public Object getRelationId(MongoDbRelation relation) {
+        return null;
+    }
+
+    @Override
+    public void flushRelation(MongoDbRelation relation) {
+    }
+
+    @Override
+    public boolean hasSingleRelation(MongoDbDocument source, RelationTypeMetadata<RelationshipMetadata> metadata, Direction direction) {
+        return source.getDelegate().get(metadata.getDatastoreMetadata().getDiscriminator()) != null;
+    }
+
+    @Override
+    public MongoDbRelation getSingleRelation(MongoDbDocument source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
-        DBObject query = getQueryObject(source, metadata, direction);
-        DBCursor matches = relationships.find(query);
-        return matches.toArray();
+        String label = metadata.getDatastoreMetadata().getDiscriminator();
+        DBRef dbref = (DBRef) source.getDelegate().get(label);
+        return new MongoDbReference(label, source, dbref);
     }
 
-    public DBObject getFrom(DBObject relation) {
-        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get(XO_IN_DOCUMENT)).get());
-    }
-
-    public DBObject getTo(DBObject relation) {
-        return documents.findOne(QueryBuilder.start(MONGODB_ID).is(relation.get(XO_OUT_DOCUMENT)).get());
-    }
-
-    private DBObject getQueryObject(DBObject source, RelationTypeMetadata<RelationshipMetadata> metadata,
+    @Override
+    public Iterable<MongoDbRelation> getRelations(MongoDbDocument source, RelationTypeMetadata<RelationshipMetadata> metadata,
             Direction direction) {
-        switch (direction) {
-        case FROM:
-            return getQueryObject(XO_IN_DOCUMENT, source, metadata.getDatastoreMetadata().getDiscriminator());
-        case TO:
-            return getQueryObject(XO_OUT_DOCUMENT, source, metadata.getDatastoreMetadata().getDiscriminator());
-        default:
-            throw new XOException("Unkown direction '" + direction.name() + "'.");
-        }
+        String label = metadata.getDatastoreMetadata().getDiscriminator();
+        Object object = source.getDelegate().get(label);
+        if (object == null) {
+            return Collections.<MongoDbRelation> emptyList();
+        } else {
+            List<DBRef> dbRefList = (List<DBRef>) object;
+            Iterator<DBRef> iterator = dbRefList.iterator();
+            return new Iterable<MongoDbRelation>() {
+                @Override
+                public Iterator<MongoDbRelation> iterator() {
+                    return new Iterator<MongoDbRelation>() {
 
+                        @Override
+                        public boolean hasNext() {
+                            return iterator.hasNext();
+                        }
+
+                        @Override
+                        public MongoDbRelation next() {
+                            return new MongoDbReference(label, source, iterator.next());
+                        }
+                    };
+                }
+            };
+        }
     }
 
-    private DBObject getQueryObject(String inOut, DBObject source, String discriminator) {
-        return QueryBuilder
-                .start()
-                .and(QueryBuilder.start(inOut).is(source.get(MONGODB_ID)).get(),
-                        QueryBuilder.start(XO_DISCRIMINATORS_PROPERTY).is(discriminator).get()).get();
+    @Override
+    public MongoDbDocument getFrom(MongoDbRelation relation) {
+        return relation.getSource();
+    }
 
+    @Override
+    public MongoDbDocument getTo(MongoDbRelation relation) {
+        return relation.getTarget();
+    }
+
+    @Override
+    public MongoDbRelation findRelationById(RelationTypeMetadata<RelationshipMetadata> metadata, Object id) {
+        return null;
     }
 
 }

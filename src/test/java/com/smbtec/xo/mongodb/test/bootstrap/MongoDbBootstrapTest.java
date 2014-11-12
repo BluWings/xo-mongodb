@@ -13,10 +13,8 @@ public class MongoDbBootstrapTest {
     public void bootstrap() {
         XOManagerFactory xoManagerFactory = XO.createXOManagerFactory("MongoDb");
         XOManager xoManager = xoManagerFactory.createXOManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
         a.setName("Test");
-        xoManager.currentTransaction().commit();
         xoManager.close();
         xoManagerFactory.close();
     }

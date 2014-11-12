@@ -31,22 +31,17 @@ public class TransientPropertyTest extends AbstractMongoDbXOManagerTest {
     @Test
     public void transientProperty() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
         a.setValue("persistent value");
         a.setTransientValue("transient value");
-        xoManager.currentTransaction().commit();
-        xoManager.currentTransaction().begin();
+        xoManager.flush();
         assertThat(a.getValue(), equalTo("persistent value"));
         assertThat(a.getTransientValue(), equalTo("transient value"));
-        xoManager.currentTransaction().commit();
         closeXOmanager();
         xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A result = xoManager.createQuery("{ value: 'persistent value' }", A.class).execute().getSingleResult();
         assertThat(result.getValue(), equalTo("persistent value"));
         assertThat(result.getTransientValue(), nullValue());
-        xoManager.currentTransaction().commit();
     }
 
 }

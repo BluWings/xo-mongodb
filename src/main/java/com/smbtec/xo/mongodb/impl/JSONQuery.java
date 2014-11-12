@@ -1,3 +1,21 @@
+/*
+ * eXtended Objects - MongoDB Binding
+ *
+ * Copyright (C) 2014 SMB GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.smbtec.xo.mongodb.impl;
 
 import java.util.HashMap;
@@ -6,6 +24,7 @@ import java.util.Map;
 import com.buschmais.xo.api.ResultIterator;
 import com.buschmais.xo.api.XOException;
 import com.buschmais.xo.spi.datastore.DatastoreQuery;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -19,22 +38,24 @@ import com.smbtec.xo.mongodb.api.annotation.Query;
  */
 public class JSONQuery implements DatastoreQuery<Query> {
 
-    private DBCollection collection;
+    private DB database;
 
-    public JSONQuery(DBCollection collection) {
-        this.collection = collection;
+    public JSONQuery(DB database) {
+        this.database = database;
     }
 
     public ResultIterator<Map<String, Object>> execute(String query, Map<String, Object> parameters) {
-        return _execute(query, parameters);
+        return execute0(query, null, parameters);
     }
 
     public ResultIterator<Map<String, Object>> execute(Query query, Map<String, Object> parameters) {
-        return _execute(query.value(), parameters);
+        return execute0(query.value(), query.type(), parameters);
     }
 
-    private ResultIterator<Map<String, Object>> _execute(final String json, final Map<String, Object> parameters) {
+    private ResultIterator<Map<String, Object>> execute0(String json, Class<?> type, Map<String, Object> parameters) {
         // TODO
+        DBCollection collection = database.getCollection("A");
+
         final DBCursor matches = collection.find((DBObject) JSON.parse(json));
 
         return new ResultIterator<Map<String, Object>>() {
@@ -45,8 +66,9 @@ public class JSONQuery implements DatastoreQuery<Query> {
 
             public Map<String, Object> next() {
                 DBObject next = matches.next();
-                final Map<String, Object> result = new HashMap<String, Object>();
-                result.put("result", next);
+                final Map<String, Object> result = new HashMap<>();
+                // TODO
+                result.put("result", new MongoDbDocument(next, "A"));
                 return result;
             }
 

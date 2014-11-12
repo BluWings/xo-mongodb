@@ -16,35 +16,26 @@
  * limitations under the License.
  *
  */
-package com.smbtec.xo.mongodb.impl.metadata;
+package com.smbtec.xo.mongodb.api.annotation;
 
-import com.buschmais.xo.spi.datastore.DatastoreRelationMetadata;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  *
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
-public class RelationshipMetadata implements DatastoreRelationMetadata<String> {
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Indexes {
 
-    private String label;
-    private boolean isCollectionType;
+    Index[] value();
 
-    public RelationshipMetadata(String discriminator, boolean isCollectionType) {
-        this.label = discriminator;
-        this.isCollectionType = isCollectionType;
-    }
-
-    @Override
-    public String getDiscriminator() {
-        return label;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public boolean isCollectionType() {
-        return isCollectionType;
-    }
 }

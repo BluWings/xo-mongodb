@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.smbtec.xo.mongodb.api.annotation.Document;
 
-@Document("A")
+@Document(collection = "A")
 public interface A {
 
     @NotNull

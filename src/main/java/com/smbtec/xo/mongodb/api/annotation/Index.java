@@ -18,30 +18,57 @@
  */
 package com.smbtec.xo.mongodb.api.annotation;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.buschmais.xo.spi.annotation.EntityDefinition;
-
 /**
- * This annotation marks an entity to be persisted to MongoDB.
  *
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
 @Documented
-@EntityDefinition
-@Retention(RUNTIME)
-@Target(TYPE)
-public @interface Document {
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Index {
 
     /**
-     * @return Returns the name of the type as {@link String}.
+     *
      */
-    String collection() default "";
+    String value();
+
+    /**
+     *
+     */
+    boolean unique() default false;
+
+    /**
+     *
+     */
+    String name() default "";
+
+    /**
+     *
+     */
+    boolean dropDups() default false;
+
+    /**
+     *
+     */
+    boolean background() default false;
+
+    /**
+     *
+     */
+    boolean sparse() default false;
+
+    /**
+     *
+     */
+    int expireAfterSeconds() default -1;
 
 }

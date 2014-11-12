@@ -1,3 +1,21 @@
+/*
+ * eXtended Objects - MongoDB Binding
+ *
+ * Copyright (C) 2014 SMB GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.smbtec.xo.mongodb.impl;
 
 import java.lang.annotation.Annotation;
@@ -7,18 +25,13 @@ import com.buschmais.xo.spi.datastore.DatastoreEntityManager;
 import com.buschmais.xo.spi.datastore.DatastoreQuery;
 import com.buschmais.xo.spi.datastore.DatastoreRelationManager;
 import com.buschmais.xo.spi.datastore.DatastoreTransaction;
-import com.mongodb.BasicDBObject;
+import com.buschmais.xo.spi.session.XOSession;
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.smbtec.xo.mongodb.api.MongoDbDatastoreSession;
 import com.smbtec.xo.mongodb.api.annotation.Query;
 import com.smbtec.xo.mongodb.impl.metadata.DocumentMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.PropertyMetadata;
 import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
-
-import static com.smbtec.xo.mongodb.impl.AbstractMongoDbPropertyManager.XO_IN_DOCUMENT;
-import static com.smbtec.xo.mongodb.impl.AbstractMongoDbPropertyManager.XO_OUT_DOCUMENT;
 
 /**
  *
@@ -28,22 +41,14 @@ import static com.smbtec.xo.mongodb.impl.AbstractMongoDbPropertyManager.XO_OUT_D
 public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
 
     private final DB database;
-    private final DBCollection documentCollection;
-    private final DBCollection referenceCollection;
 
     private MongoDbDocumentManager documentManager;
     private MongoDbRelationshipManager relationManager;
 
     public MongoDbDatastoreSessionImpl(DB database) {
         this.database = database;
-        documentCollection = database.getCollection("documents");
-        referenceCollection = database.getCollection("relationships");
-
-        referenceCollection.ensureIndex(new BasicDBObject().append(XO_IN_DOCUMENT, 1));
-        referenceCollection.ensureIndex(new BasicDBObject().append(XO_OUT_DOCUMENT, 1));
-
-        documentManager = new MongoDbDocumentManager(documentCollection);
-        relationManager = new MongoDbRelationshipManager(documentCollection, referenceCollection);
+        documentManager = new MongoDbDocumentManager(database);
+        relationManager = new MongoDbRelationshipManager(database);
     }
 
     public DB getDatabase() {
@@ -51,14 +56,16 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
     }
 
     public DatastoreTransaction getDatastoreTransaction() {
-        return new MongoDbDatastoreTransaction();
+        return null;
     }
 
-    public DatastoreEntityManager<Object, DBObject, DocumentMetadata, String, PropertyMetadata> getDatastoreEntityManager() {
+    @Override
+    public DatastoreEntityManager<Object, MongoDbDocument, DocumentMetadata, String, PropertyMetadata> getDatastoreEntityManager() {
         return documentManager;
     }
 
-    public DatastoreRelationManager<DBObject, Object, DBObject, RelationshipMetadata, String, PropertyMetadata> getDatastoreRelationManager() {
+    @Override
+    public DatastoreRelationManager<MongoDbDocument, Object, MongoDbRelation, RelationshipMetadata, String, PropertyMetadata> getDatastoreRelationManager() {
         return relationManager;
     }
 
@@ -68,7 +75,7 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
 
     public <QL extends Annotation> DatastoreQuery<QL> createQuery(Class<QL> queryLanguage) {
         if (Query.class.equals(queryLanguage)) {
-            return (DatastoreQuery<QL>) new JSONQuery(getDocuments());
+            return (DatastoreQuery<QL>) new JSONQuery(database);
         }
         throw new XOException("Unsupported query language: " + queryLanguage.getName());
     }
@@ -76,32 +83,9 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
     public void close() {
     }
 
-    public DBCollection getDocuments() {
-        return this.documentCollection;
-    }
-
-    public DBCollection getReferences() {
-        return this.referenceCollection;
-    }
-
-    private static class MongoDbDatastoreTransaction implements DatastoreTransaction {
-
-        @Override
-        public void begin() {
-        }
-
-        @Override
-        public void commit() {
-        }
-
-        @Override
-        public void rollback() {
-        }
-
-        @Override
-        public boolean isActive() {
-            return true;
-        }
+    @Override
+    public <R> R createRepository(XOSession xoSession, Class<R> type) {
+        return (R) new MongoDbRepositoryImpl(database, xoSession);
     }
 
 }

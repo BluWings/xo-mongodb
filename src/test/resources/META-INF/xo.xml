@@ -2,7 +2,10 @@
     <xo-unit name="MongoDb">
         <description>This is a test unit for MongoDb.</description>
         <url>fongodb:///</url>
-        <provider>com.smbtec.xo.mongodb.api.MongoDbXOProvider</provider>
+        <!--
+        <url>mongodb://127.0.0.1:27017</url>
+         -->
+         <provider>com.smbtec.xo.mongodb.api.MongoDbXOProvider</provider>
         <types>
             <type>com.smbtec.xo.mongodb.test.bootstrap.composite.A</type>
         </types>

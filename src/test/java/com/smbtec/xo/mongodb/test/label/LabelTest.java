@@ -1,6 +1,6 @@
 package com.smbtec.xo.mongodb.test.label;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.net.URISyntaxException;
@@ -10,8 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.buschmais.xo.api.CompositeObject;
 import com.buschmais.xo.api.XOManager;
 import com.buschmais.xo.api.bootstrap.XOUnit;
+import com.smbtec.xo.mongodb.impl.MongoDbDocument;
 import com.smbtec.xo.mongodb.test.AbstractMongoDbXOManagerTest;
 import com.smbtec.xo.mongodb.test.label.composite.ExplicitLabel;
 import com.smbtec.xo.mongodb.test.label.composite.ImplicitLabel;
@@ -31,24 +33,16 @@ public class LabelTest extends AbstractMongoDbXOManagerTest {
     @Test
     public void implicitLabel() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         ImplicitLabel implicitLabel = xoManager.create(ImplicitLabel.class);
-        assertThat(
-                xoManager
-                        .createQuery("{ \"_xo_discriminator_ImplicitLabel\": \"ImplicitLabel\" }", ImplicitLabel.class)
-                        .execute().getSingleResult(), is(implicitLabel));
-        xoManager.currentTransaction().commit();
+        MongoDbDocument mongoDocument = (MongoDbDocument) ((CompositeObject) implicitLabel).getDelegate();
+        assertThat(mongoDocument.getLabel(), equalTo("ImplicitLabel"));
     }
 
     @Test
     public void explicitLabel() {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         ExplicitLabel explicitLabel = xoManager.create(ExplicitLabel.class);
-        assertThat(
-                xoManager
-                        .createQuery("{ \"_xo_discriminator_EXPLICIT_LABEL\": \"EXPLICIT_LABEL\" }",
-                                ExplicitLabel.class).execute().getSingleResult(), is(explicitLabel));
-        xoManager.currentTransaction().commit();
+        MongoDbDocument mongoDocument = (MongoDbDocument) ((CompositeObject) explicitLabel).getDelegate();
+        assertThat(mongoDocument.getLabel(), equalTo("EXPLICIT_LABEL"));
     }
 }

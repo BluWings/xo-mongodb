@@ -16,35 +16,37 @@
  * limitations under the License.
  *
  */
-package com.smbtec.xo.mongodb.impl.metadata;
+package com.smbtec.xo.mongodb.api.annotation;
 
-import com.buschmais.xo.spi.datastore.DatastoreRelationMetadata;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import com.buschmais.xo.spi.annotation.RelationDefinition;
 
 /**
+ * Marks a field of an entity to be stored using a {@link com.mongodb.DBRef}.
  *
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
-public class RelationshipMetadata implements DatastoreRelationMetadata<String> {
-
-    private String label;
-    private boolean isCollectionType;
-
-    public RelationshipMetadata(String discriminator, boolean isCollectionType) {
-        this.label = discriminator;
-        this.isCollectionType = isCollectionType;
-    }
-
-    @Override
-    public String getDiscriminator() {
-        return label;
-    }
+@Documented
+@RelationDefinition
+@Retention(RUNTIME)
+@Target({ METHOD })
+public @interface DBRef {
 
     /**
      *
-     * @return
      */
-    public boolean isCollectionType() {
-        return isCollectionType;
-    }
+    boolean lazy() default true;
+
+    /**
+     *
+     */
+    boolean idOnly() default false;
+
 }

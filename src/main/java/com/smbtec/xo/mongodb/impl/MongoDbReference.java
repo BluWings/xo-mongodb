@@ -16,35 +16,36 @@
  * limitations under the License.
  *
  */
-package com.smbtec.xo.mongodb.impl.metadata;
+package com.smbtec.xo.mongodb.impl;
 
-import com.buschmais.xo.spi.datastore.DatastoreRelationMetadata;
+import com.mongodb.DBRef;
 
 /**
  *
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
-public class RelationshipMetadata implements DatastoreRelationMetadata<String> {
+public class MongoDbReference extends MongoDbRelation {
 
-    private String label;
-    private boolean isCollectionType;
+    private MongoDbDocument target;
+    private DBRef dbref;
 
-    public RelationshipMetadata(String discriminator, boolean isCollectionType) {
-        this.label = discriminator;
-        this.isCollectionType = isCollectionType;
+    public MongoDbReference(String label, MongoDbDocument source, DBRef dbref) {
+        super(source);
+        this.dbref = dbref;
+    }
+
+    public MongoDbReference(String label, MongoDbDocument source, MongoDbDocument target) {
+        super(source, label);
+        this.target = target;
     }
 
     @Override
-    public String getDiscriminator() {
-        return label;
+    public MongoDbDocument getTarget() {
+        if (target == null) {
+            target = new MongoDbDocument(dbref.fetch(), dbref.getRef());
+        }
+        return target;
     }
 
-    /**
-     *
-     * @return
-     */
-    public boolean isCollectionType() {
-        return isCollectionType;
-    }
 }

@@ -16,35 +16,33 @@
  * limitations under the License.
  *
  */
-package com.smbtec.xo.mongodb.impl.metadata;
-
-import com.buschmais.xo.spi.datastore.DatastoreRelationMetadata;
+package com.smbtec.xo.mongodb.api;
 
 /**
  *
  * @author Lars Martin - lars.martin@smb-tec.com
  *
  */
-public class RelationshipMetadata implements DatastoreRelationMetadata<String> {
+public enum IndexDirection {
 
-    private String label;
-    private boolean isCollectionType;
+    ASCENDING(1), DESCENDING(-1);
 
-    public RelationshipMetadata(String discriminator, boolean isCollectionType) {
-        this.label = discriminator;
-        this.isCollectionType = isCollectionType;
+    private final int indexValue;
+
+    private IndexDirection(int indexValue) {
+        this.indexValue = indexValue;
     }
 
-    @Override
-    public String getDiscriminator() {
-        return label;
+    public int toIndexValue() {
+        return indexValue;
     }
 
-    /**
-     *
-     * @return
-     */
-    public boolean isCollectionType() {
-        return isCollectionType;
+    public static IndexDirection byValue(int indexValue) {
+        switch (indexValue) {
+        case -1:
+            return DESCENDING;
+        default:
+            return ASCENDING;
+        }
     }
 }

@@ -32,29 +32,23 @@ public class CrudTest extends AbstractMongoDbXOManagerTest {
     @Test
     public void create() throws InterruptedException {
         XOManager xoManager = getXoManager();
-        xoManager.currentTransaction().begin();
         A a = xoManager.create(A.class);
         a.setName("Foo");
-        xoManager.currentTransaction().commit();
-        xoManager.currentTransaction().begin();
+        xoManager.flush();
         a = xoManager.createQuery("{ name : 'Foo' }", A.class).execute().getSingleResult();
         assertThat(a.getName(), equalTo("Foo"));
         a.setName("Bar");
-        xoManager.currentTransaction().commit();
-        xoManager.currentTransaction().begin();
+        xoManager.flush();
         A result = xoManager.createQuery("{ name : 'Bar' }", A.class).execute().getSingleResult();
         xoManager.delete(result);
-        xoManager.currentTransaction().commit();
-        xoManager.currentTransaction().begin();
         try {
             xoManager.createQuery("{}").execute().getSingleResult();
             Assert.fail("An exception is expected.");
         } catch (XOException e) {
         }
-        xoManager.currentTransaction().commit();
     }
 
-    @Document("A")
+    @Document(collection = "A")
     public interface A {
 
         String getName();
