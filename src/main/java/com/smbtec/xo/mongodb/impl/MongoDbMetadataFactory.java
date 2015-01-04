@@ -46,6 +46,7 @@ import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
  */
 public class MongoDbMetadataFactory implements DatastoreMetadataFactory<DocumentMetadata, String, RelationshipMetadata, String> {
 
+    @Override
     public DocumentMetadata createEntityMetadata(AnnotatedType annotatedType, Map<Class<?>, TypeMetadata> metadataByType) {
         final Document annotation = annotatedType.getAnnotation(Document.class);
         String collection = null;
@@ -71,6 +72,7 @@ public class MongoDbMetadataFactory implements DatastoreMetadataFactory<Document
         return new DocumentMetadata(collection);
     }
 
+    @Override
     public RelationshipMetadata createRelationMetadata(AnnotatedElement<?> annotatedElement, Map<Class<?>, TypeMetadata> metadataByType) {
         boolean isCollection = false;
         String label = annotatedElement.getName();
@@ -87,18 +89,22 @@ public class MongoDbMetadataFactory implements DatastoreMetadataFactory<Document
         return new RelationshipMetadata(label, isCollection);
     }
 
+    @Override
     public <ImplementedByMetadata> ImplementedByMetadata createImplementedByMetadata(AnnotatedMethod annotatedMethod) {
         return null;
     }
 
+    @Override
     public <CollectionPropertyMetadata> CollectionPropertyMetadata createCollectionPropertyMetadata(PropertyMethod propertyMethod) {
         return null;
     }
 
+    @Override
     public <ReferencePropertyMetadata> ReferencePropertyMetadata createReferencePropertyMetadata(PropertyMethod propertyMethod) {
         return null;
     }
 
+    @Override
     public PropertyMetadata createPropertyMetadata(PropertyMethod propertyMethod) {
         final Property property = propertyMethod.getAnnotationOfProperty(Property.class);
         final String name = property != null ? property.value() : propertyMethod.getName();
@@ -110,6 +116,7 @@ public class MongoDbMetadataFactory implements DatastoreMetadataFactory<Document
         return new PropertyMetadata(name);
     }
 
+    @Override
     public <IndexedPropertyMetadata> IndexedPropertyMetadata createIndexedPropertyMetadata(PropertyMethod propertyMethod) {
         return null;
     }

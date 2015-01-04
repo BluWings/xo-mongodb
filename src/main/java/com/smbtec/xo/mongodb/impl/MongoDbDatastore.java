@@ -75,15 +75,19 @@ public class MongoDbDatastore implements Datastore<MongoDbDatastoreSession, Docu
         }
     }
 
+    @Override
     public DatastoreMetadataFactory<DocumentMetadata, String, RelationshipMetadata, String> getMetadataFactory() {
         return metadataFactory;
     }
 
+    @Override
     public MongoDbDatastoreSession createSession() {
         return new MongoDbDatastoreSessionImpl(database);
     }
 
+    @Override
     public void close() {
+        // intentionally left blank
     }
 
     private void ensureIndex(String collectionName, IndexDefinition indexDefinition) {

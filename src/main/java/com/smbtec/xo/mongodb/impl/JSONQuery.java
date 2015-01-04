@@ -44,10 +44,12 @@ public class JSONQuery implements DatastoreQuery<Query> {
         this.database = database;
     }
 
+    @Override
     public ResultIterator<Map<String, Object>> execute(String query, Map<String, Object> parameters) {
         return execute0(query, null, parameters);
     }
 
+    @Override
     public ResultIterator<Map<String, Object>> execute(Query query, Map<String, Object> parameters) {
         return execute0(query.value(), query.type(), parameters);
     }

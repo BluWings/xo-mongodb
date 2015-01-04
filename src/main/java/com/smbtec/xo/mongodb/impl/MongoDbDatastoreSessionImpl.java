@@ -51,10 +51,12 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
         relationManager = new MongoDbRelationshipManager(database);
     }
 
+    @Override
     public DB getDatabase() {
         return database;
     }
 
+    @Override
     public DatastoreTransaction getDatastoreTransaction() {
         return null;
     }
@@ -69,10 +71,12 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
         return relationManager;
     }
 
+    @Override
     public Class<? extends Annotation> getDefaultQueryLanguage() {
         return Query.class;
     }
 
+    @Override
     public <QL extends Annotation> DatastoreQuery<QL> createQuery(Class<QL> queryLanguage) {
         if (Query.class.equals(queryLanguage)) {
             return (DatastoreQuery<QL>) new JSONQuery(database);
@@ -80,7 +84,9 @@ public class MongoDbDatastoreSessionImpl implements MongoDbDatastoreSession {
         throw new XOException("Unsupported query language: " + queryLanguage.getName());
     }
 
+    @Override
     public void close() {
+        // intentionally left blank
     }
 
     @Override

@@ -39,8 +39,8 @@ import com.smbtec.xo.mongodb.impl.metadata.RelationshipMetadata;
  */
 public class MongoDbXOProvider implements XODatastoreProvider<DocumentMetadata, String, RelationshipMetadata, String> {
 
-    public Datastore<MongoDbDatastoreSession, DocumentMetadata, String, RelationshipMetadata, String> createDatastore(
-            XOUnit xoUnit) {
+    @Override
+    public Datastore<MongoDbDatastoreSession, DocumentMetadata, String, RelationshipMetadata, String> createDatastore(XOUnit xoUnit) {
         if (xoUnit == null) {
             throw new IllegalArgumentException("XOUnit must not be null");
         }
@@ -50,7 +50,7 @@ public class MongoDbXOProvider implements XODatastoreProvider<DocumentMetadata, 
         }
 
         try {
-            if (uri.getScheme().equals("fongodb")) {
+            if ("fongodb".equals(uri.getScheme())) {
                 // in memory only for testing purposes
                 Fongo fongo = new Fongo("test");
                 return new MongoDbDatastore(fongo.getDB("xo"));

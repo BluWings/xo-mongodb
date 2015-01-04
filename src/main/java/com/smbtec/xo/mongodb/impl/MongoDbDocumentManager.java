@@ -69,8 +69,7 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
 
     @Override
     public MongoDbDocument findEntityById(EntityTypeMetadata<DocumentMetadata> metadata, String discriminator, Object id) {
-        DBObject delegate = database.getCollection(discriminator)
-                .find(new BasicDBObject(MongoDbConstants.MONGODB_ID, id)).one();
+        DBObject delegate = database.getCollection(discriminator).find(new BasicDBObject(MongoDbConstants.MONGODB_ID, id)).one();
         if (delegate != null) {
             return new MongoDbDocument(delegate, discriminator);
         } else {
@@ -78,8 +77,8 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         }
     }
 
-    public MongoDbDocument createEntity(TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types,
-            Set<String> discriminators, Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
+    public MongoDbDocument createEntity(TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types, Set<String> discriminators,
+            Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
         if (types.size() > 1) {
             throw new XOException("multiple inheritance not allowed");
         }
@@ -101,21 +100,19 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         database.getCollection(entity.getLabel()).remove(entity.getDelegate());
     }
 
-    public ResultIterator<MongoDbDocument> findEntity(EntityTypeMetadata<DocumentMetadata> entityTypeMetadata,
-            String discriminator, Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> values) {
+    public ResultIterator<MongoDbDocument> findEntity(EntityTypeMetadata<DocumentMetadata> entityTypeMetadata, String discriminator,
+            Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> values) {
         if (values.size() > 1) {
             throw new XOException("Only one property value is supported for find operation");
         }
 
-        Map.Entry<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> entry = values.entrySet().iterator()
-                .next();
+        Map.Entry<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> entry = values.entrySet().iterator().next();
         PrimitivePropertyMethodMetadata<PropertyMetadata> propertyMethodMetadata = entry.getKey();
         PropertyMetadata propertyMetadata = propertyMethodMetadata.getDatastoreMetadata();
         Object value = entry.getValue();
         String collectionName = entityTypeMetadata.getDatastoreMetadata().getDiscriminator();
 
-        final DBCursor matches = database.getCollection(collectionName).find(
-                new BasicDBObject(propertyMetadata.getName(), value));
+        final DBCursor matches = database.getCollection(collectionName).find(new BasicDBObject(propertyMetadata.getName(), value));
 
         return new ResultIterator<MongoDbDocument>() {
 
@@ -133,13 +130,14 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
 
             @Override
             public void remove() {
+                // intentionally left blank
             }
         };
     }
 
     public void migrateEntity(MongoDbDocument entity, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types,
-            Set<String> discriminators, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> targetTypes,
-            Set<String> targetDiscriminators) {
+            Set<String> discriminators, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> targetTypes, Set<String> targetDiscriminators) {
+        // TODO
     }
 
     public void flushEntity(MongoDbDocument entity) {
