@@ -53,16 +53,19 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         this.database = database;
     }
 
+    @Override
     public boolean isEntity(Object o) {
         return MongoDbDocument.class.isAssignableFrom(o.getClass());
     }
 
+    @Override
     public Set<String> getEntityDiscriminators(MongoDbDocument entity) {
         final Set<String> discriminators = new HashSet<>();
         discriminators.add(entity.getLabel());
         return discriminators;
     }
 
+    @Override
     public Object getEntityId(MongoDbDocument entity) {
         return entity.getDelegate().get(MongoDbConstants.MONGODB_ID);
     }
@@ -77,6 +80,7 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         }
     }
 
+    @Override
     public MongoDbDocument createEntity(TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types, Set<String> discriminators,
             Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> exampleEntity) {
         if (types.size() > 1) {
@@ -96,10 +100,12 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         return new MongoDbDocument(document, label);
     }
 
+    @Override
     public void deleteEntity(MongoDbDocument entity) {
         database.getCollection(entity.getLabel()).remove(entity.getDelegate());
     }
 
+    @Override
     public ResultIterator<MongoDbDocument> findEntity(EntityTypeMetadata<DocumentMetadata> entityTypeMetadata, String discriminator,
             Map<PrimitivePropertyMethodMetadata<PropertyMetadata>, Object> values) {
         if (values.size() > 1) {
@@ -135,11 +141,13 @@ public class MongoDbDocumentManager extends AbstractMongoDbPropertyManager<Mongo
         };
     }
 
+    @Override
     public void migrateEntity(MongoDbDocument entity, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> types,
             Set<String> discriminators, TypeMetadataSet<EntityTypeMetadata<DocumentMetadata>> targetTypes, Set<String> targetDiscriminators) {
         // TODO
     }
 
+    @Override
     public void flushEntity(MongoDbDocument entity) {
         database.getCollection(entity.getLabel()).save(entity.getDelegate());
     }

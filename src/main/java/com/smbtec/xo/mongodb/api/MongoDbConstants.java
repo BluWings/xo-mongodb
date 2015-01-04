@@ -18,8 +18,10 @@
  */
 package com.smbtec.xo.mongodb.api;
 
-public class MongoDbConstants {
+public final class MongoDbConstants {
 
     public static final String MONGODB_ID = "_id";
 
+    private MongoDbConstants() {
+    }
 }
